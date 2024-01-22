@@ -1,6 +1,62 @@
 import React from "react";
+import { useState, useReducer, useEffect } from "react";
+
+const TYPE = {
+  TITLE: "title",
+  RATE: "rate",
+  QUANTITY: "quantity",
+  TAX: "tax",
+};
+const total = 0;
+const taxAdded = 0;
 
 const Section = () => {
+  const [totalAmt, setTotalAmt] = useState(0);
+  const [subTotal, setSubTotal] = useState(0);
+  const [taxAmt, setTaxAmt] = useState(0);
+  const [title, setTitle] = useState(0);
+  const [rate, setRate] = useState(0);
+  const [quantity, setQuantity] = useState(0);
+  const [tax, setTax] = useState(0);
+  const [balance, setBalance] = useState(2000.0);
+  const [balanceDue, setBalanceDue] = useState(0.0);
+
+  const input_reducer = (type, value) => {
+    switch (type) {
+      case TYPE.TITLE:
+        setTitle(value);
+        return;
+      case TYPE.RATE:
+        setRate(parseInt(value));
+        return;
+      case TYPE.QUANTITY:
+        setQuantity(parseInt(value));
+        return;
+      case TYPE.TAX:
+        setTax(parseInt(value));
+        return;
+      default:
+        return;
+    }
+  };
+
+  useEffect(() => {
+    setSubTotal(rate * quantity);
+    setTaxAmt((subTotal * tax) / 100);
+    setTotalAmt(subTotal + taxAmt);
+    setBalance(
+      balance >= subTotal + taxAmt
+        ? balance - subTotal + taxAmt
+        : setBalanceDue((subTotal + taxAmt) - balance)
+    );
+    setBalanceDue(
+      balance >= subTotal + taxAmt
+        ? setBalanceDue(0)
+        : setBalanceDue((subTotal + taxAmt)-balance)
+    );
+
+  }, [rate, tax, quantity]);
+
   return (
     <main>
       <div className="py-6 text-2xl font-bold font-sans">
@@ -20,6 +76,7 @@ const Section = () => {
             <input
               className="border-gray-200 border-2 rounded-lg px-3 py-2 font-mono text-lg"
               placeholder="Title"
+              onChange={(e) => input_reducer(TYPE.TITLE, e.target.value)}
             />
           </div>
           <div>
@@ -27,6 +84,7 @@ const Section = () => {
               className=" border-gray-200 border-2 w-28 rounded-lg px-3 py-2 text-end font-mono text-lg"
               type="number"
               placeholder="0.0"
+              onChange={(e) => input_reducer(TYPE.RATE, e.target.value)}
             />
           </div>
           <div>
@@ -34,6 +92,7 @@ const Section = () => {
               className=" border-gray-200 border-2 w-28 rounded-lg px-3 py-2 text-end font-mono text-lg"
               type="number"
               placeholder="0.0"
+              onChange={(e) => input_reducer(TYPE.QUANTITY, e.target.value)}
             />
           </div>
           <div>
@@ -41,9 +100,10 @@ const Section = () => {
               className="border-gray-200 border-2 w-28 rounded-lg px-1 py-2 text-end font-mono text-lg"
               type="number"
               placeholder="0.0%"
+              onChange={(e) => input_reducer(TYPE.TAX, e.target.value)}
             />
           </div>
-          <div>0.0</div>
+          <div>{subTotal + taxAmt === 0 ? "0.0" : subTotal + taxAmt}</div>
         </div>
       </div>
       <div className=" text-start mx-40 my-3 flex gap-4">
@@ -67,20 +127,35 @@ const Section = () => {
         <div className="right min-w-96 font-mono font-bold text-gray-600">
           <div className="flex justify-between">
             <label>Subtotal</label>
-            <span>$0.0</span>
+            <p>
+              ${subTotal}
+              <span>.0</span>{" "}
+            </p>
           </div>
           <div className="flex justify-between">
             <label>Taxes</label>
-            <span>$0.0</span>
+            <p>
+              $<span>{taxAmt === 0 ? "0.0" : taxAmt}</span>{" "}
+            </p>
           </div>
           <hr></hr>
           <div className="flex justify-between">
             <label>Balance </label>
-            <span>$2000.0</span>
+            <p>
+              ${balance}
+              <span>.0</span>{" "}
+            </p>
           </div>
           <div className="flex justify-between">
             <label>Balance Due </label>
-            <span>$0.0</span>
+            <p>
+              ${}
+              <span>
+                {balanceDue == 0 || balanceDue==undefined
+                  ? "0.0"
+                  : balanceDue}
+              </span>{" "}
+            </p>
           </div>
         </div>
       </div>
